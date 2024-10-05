@@ -8,34 +8,60 @@ class App extends React.Component {
     personagens: [],
     personagemSelecionado: null,
     filtroPersonagens: [],
-    paginaAtual: 1, // Adiciona controle da página atual
-    carregando: false, // Controle de carregamento
+    paginaAtual: 1,
+    carregando: false,
+    filtroNome: "",
+    filtroStatus: "",
+    filtroEspecie: "",
+    filtroTipo: "",
+    filtroGenero: "",
   };
 
   componentDidMount() {
-    this.mostrarPersonagens(); // Carrega a primeira página de personagens
-    window.addEventListener("scroll", this.detectarScroll); // Adiciona evento de scroll
+    this.mostrarPersonagens();
+    window.addEventListener("scroll", this.detectarScroll);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.detectarScroll); // Remove evento de scroll ao desmontar
+    window.removeEventListener("scroll", this.detectarScroll);
   }
 
+  construirUrl = () => {
+    const { paginaAtual, filtroNome, filtroStatus, filtroEspecie, filtroTipo, filtroGenero } = this.state;
+    let url = `https://rickandmortyapi.com/api/character?page=${paginaAtual}`;
+    
+    const filtros = [];
+
+    if (filtroNome) filtros.push(`name=${filtroNome}`);
+    if (filtroStatus) filtros.push(`status=${filtroStatus}`);
+    if (filtroEspecie) filtros.push(`species=${filtroEspecie}`);
+    if (filtroTipo) filtros.push(`type=${filtroTipo}`);
+    if (filtroGenero) filtros.push(`gender=${filtroGenero}`);
+
+    if (filtros.length > 0) {
+      url += `&${filtros.join('&')}`;
+    }
+
+    return url;
+  };
+
   mostrarPersonagens = () => {
-    const { paginaAtual, personagens } = this.state;
-    this.setState({ carregando: true }); // Inicia o carregamento
+    const { personagens } = this.state;
+    this.setState({ carregando: true });
+
+    const url = this.construirUrl();
 
     axios
-      .get(`https://rickandmortyapi.com/api/character?page=${paginaAtual}`, {
+      .get(url, {
         headers: {
           "Content-Type": "application/json",
         },
       })
       .then((resposta) => {
         this.setState({
-          personagens: [...personagens, ...resposta.data.results], // Adiciona novos personagens à lista
+          personagens: [...personagens, ...resposta.data.results],
           filtroPersonagens: [...personagens, ...resposta.data.results],
-          carregando: false, // Finaliza o carregamento
+          carregando: false,
         });
       })
       .catch((erro) => {
@@ -52,11 +78,19 @@ class App extends React.Component {
     this.setState({ personagemSelecionado: null });
   };
 
-  filtrarPersonagens = (filtro) => {
-    const personagensFiltrados = this.state.personagens.filter((personagem) =>
-      personagem.name.toLowerCase().includes(filtro.toLowerCase())
+  filtrarPersonagens = (filtroNome, filtroStatus, filtroEspecie, filtroTipo, filtroGenero) => {
+    this.setState(
+      {
+        filtroNome,
+        filtroStatus,
+        filtroEspecie,
+        filtroTipo,
+        filtroGenero,
+        paginaAtual: 1,
+        personagens: [],
+      },
+      this.mostrarPersonagens
     );
-    this.setState({ filtroPersonagens: personagensFiltrados });
   };
 
   detectarScroll = () => {
@@ -66,7 +100,7 @@ class App extends React.Component {
     ) {
       this.setState(
         (prevState) => ({ paginaAtual: prevState.paginaAtual + 1 }),
-        () => this.mostrarPersonagens() // Carrega mais personagens ao rolar
+        () => this.mostrarPersonagens()
       );
     }
   };
@@ -97,4 +131,3 @@ class App extends React.Component {
 }
 
 export default App;
-
