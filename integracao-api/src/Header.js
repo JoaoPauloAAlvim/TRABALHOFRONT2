@@ -49,7 +49,7 @@ class Header extends React.Component {
         
         <input
           type="text"
-          placeholder="Digite o nome do personagem"
+          placeholder="Pesquise o personagem"
           value={filtroNome}
           onChange={this.handleChangeNome}
           aria-label="Filtro de personagens"

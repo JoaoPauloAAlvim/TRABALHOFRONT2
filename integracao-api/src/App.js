@@ -15,6 +15,7 @@ class App extends React.Component {
     filtroEspecie: "",
     filtroTipo: "",
     filtroGenero: "",
+    mensagemErro: "", 
   };
 
   componentDidMount() {
@@ -47,7 +48,7 @@ class App extends React.Component {
 
   mostrarPersonagens = () => {
     const { personagens } = this.state;
-    this.setState({ carregando: true });
+    this.setState({ carregando: true, mensagemErro: "" });
 
     const url = this.construirUrl();
 
@@ -65,8 +66,22 @@ class App extends React.Component {
         });
       })
       .catch((erro) => {
-        console.log(erro.response.data);
+        console.error(erro.response.data);
         this.setState({ carregando: false });
+
+        if (erro.response) {
+          if (erro.response.status === 404) {
+            this.setState({ mensagemErro: "Personagens não encontrados. Tente novamente." });
+          } else if (erro.response.status === 500) {
+            this.setState({ mensagemErro: "Erro interno no servidor. Tente novamente mais tarde." });
+          } else {
+            this.setState({ mensagemErro: "Ocorreu um erro. Tente novamente." });
+          }
+        } else if (erro.request) {
+          this.setState({ mensagemErro: "Erro ao conectar com o servidor. Verifique sua conexão." });
+        } else {
+          this.setState({ mensagemErro: "Erro ao realizar a requisição. Tente novamente." });
+        }
       });
   };
 
@@ -106,7 +121,7 @@ class App extends React.Component {
   };
 
   render() {
-    const { filtroPersonagens, personagemSelecionado, carregando } = this.state;
+    const { filtroPersonagens, personagemSelecionado, carregando, mensagemErro } = this.state;
 
     return (
       <div>
@@ -125,6 +140,7 @@ class App extends React.Component {
           />
         )}
         {carregando && <p>Carregando...</p>}
+        {mensagemErro && <p style={{ color: 'red' }}>{mensagemErro}</p>} 
       </div>
     );
   }
