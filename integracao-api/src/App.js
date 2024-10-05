@@ -8,11 +8,41 @@ class App extends React.Component {
     personagens: [],
     personagemSelecionado: null,
     filtroPersonagens: [],
+    paginaAtual: 1, // Adiciona controle da página atual
+    carregando: false, // Controle de carregamento
   };
 
   componentDidMount() {
-    this.mostrarPersonagens();
+    this.mostrarPersonagens(); // Carrega a primeira página de personagens
+    window.addEventListener("scroll", this.detectarScroll); // Adiciona evento de scroll
   }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.detectarScroll); // Remove evento de scroll ao desmontar
+  }
+
+  mostrarPersonagens = () => {
+    const { paginaAtual, personagens } = this.state;
+    this.setState({ carregando: true }); // Inicia o carregamento
+
+    axios
+      .get(`https://rickandmortyapi.com/api/character?page=${paginaAtual}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((resposta) => {
+        this.setState({
+          personagens: [...personagens, ...resposta.data.results], // Adiciona novos personagens à lista
+          filtroPersonagens: [...personagens, ...resposta.data.results],
+          carregando: false, // Finaliza o carregamento
+        });
+      })
+      .catch((erro) => {
+        console.log(erro.response.data);
+        this.setState({ carregando: false });
+      });
+  };
 
   selecionarPersonagem = (personagem) => {
     this.setState({ personagemSelecionado: personagem });
@@ -22,24 +52,6 @@ class App extends React.Component {
     this.setState({ personagemSelecionado: null });
   };
 
-  mostrarPersonagens() {
-    axios
-      .get("https://rickandmortyapi.com/api/character", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then((resposta) => {
-        this.setState({
-          personagens: resposta.data.results,
-          filtroPersonagens: resposta.data.results, // Inicializa também com todos os personagens
-        });
-      })
-      .catch((erro) => {
-        console.log(erro.response.data);
-      });
-  }
-
   filtrarPersonagens = (filtro) => {
     const personagensFiltrados = this.state.personagens.filter((personagem) =>
       personagem.name.toLowerCase().includes(filtro.toLowerCase())
@@ -47,8 +59,20 @@ class App extends React.Component {
     this.setState({ filtroPersonagens: personagensFiltrados });
   };
 
+  detectarScroll = () => {
+    if (
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 &&
+      !this.state.carregando
+    ) {
+      this.setState(
+        (prevState) => ({ paginaAtual: prevState.paginaAtual + 1 }),
+        () => this.mostrarPersonagens() // Carrega mais personagens ao rolar
+      );
+    }
+  };
+
   render() {
-    const { filtroPersonagens, personagemSelecionado } = this.state;
+    const { filtroPersonagens, personagemSelecionado, carregando } = this.state;
 
     return (
       <div>
@@ -59,16 +83,18 @@ class App extends React.Component {
           />
         ) : (
           <Header
-            personagens={filtroPersonagens} // Aqui usamos a lista filtrada
+            personagens={filtroPersonagens}
             onSelectPersonagem={this.selecionarPersonagem}
             onFiltrarPersonagens={this.filtrarPersonagens}
             logo="https://www.freepnglogos.com/uploads/rick-and-morty-png/list-rick-and-morty-episodes-wikipedia-24.png"
             descricao="Logo Rick and Morty"
           />
         )}
+        {carregando && <p>Carregando...</p>}
       </div>
     );
   }
 }
 
 export default App;
+
