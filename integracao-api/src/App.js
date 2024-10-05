@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
-import Header from "./Header";
-import DetalhesPersonagens from "./DetalhesPersonagens";
+import Header from "./Components/Header";
+import DetalhesPersonagens from "./Components/DetalhesPersonagens";
 
 class App extends React.Component {
   state = {
