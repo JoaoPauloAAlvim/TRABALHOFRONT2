@@ -1,17 +1,42 @@
 import React from "react";
 
-class Header extends React.Component{
+class Header extends React.Component {
+  state = {
+    filtro: "",
+  };
 
-render(){
-    return<div>
-        <img src={"https://www.freepnglogos.com/uploads/rick-and-morty-png/list-rick-and-morty-episodes-wikipedia-24.png"} alt={"Logo Rick and Morty"}/>
+  handleChange = (event) => {
+    const { value } = event.target;
+    this.setState({ filtro: value });
+    this.props.onFiltrarPersonagens(value);
+  };
+
+  render() {
+    const { personagens, onSelectPersonagem, logo, descricao } = this.props;
+    const { filtro } = this.state;
+
+    return (
+      <div>
+        <img src={logo} alt={descricao} />
+        <input
+          type="text"
+          placeholder="Digite o nome do personagem"
+          value={filtro}
+          onChange={this.handleChange}
+        />
         <div>
-          {this.props.personagens.map((personagem) => (
-            <img key={personagem.id}src ={personagem.image} alt={personagem.name}onClick={() => this.props.onSelectPersonagem(personagem)}/>
+          {personagens.map((personagem) => (
+            <img
+              key={personagem.id}
+              src={personagem.image}
+              alt={personagem.name}
+              onClick={() => onSelectPersonagem(personagem)}
+            />
           ))}
         </div>
-    </div>
-    }
+      </div>
+    );
+  }
 }
 
 export default Header;

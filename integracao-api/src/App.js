@@ -1,25 +1,26 @@
 import React from "react";
 import axios from "axios";
-import  Header  from "./Header"; 
-import DetalhesPersonagens from "./DetalhesPersonagens"; 
+import Header from "./Header";
+import DetalhesPersonagens from "./DetalhesPersonagens";
 
 class App extends React.Component {
   state = {
     personagens: [],
     personagemSelecionado: null,
+    filtroPersonagens: [],
   };
 
   componentDidMount() {
     this.mostrarPersonagens();
   }
 
-  selecionarPersonagem=(personagem)=>{
-    this.setState({personagemSelecionado : personagem});
-  }
-  voltarParaLista=()=>{
-    this.setState({personagemSelecionado:null})
-  }
-  
+  selecionarPersonagem = (personagem) => {
+    this.setState({ personagemSelecionado: personagem });
+  };
+
+  voltarParaLista = () => {
+    this.setState({ personagemSelecionado: null });
+  };
 
   mostrarPersonagens() {
     axios
@@ -29,30 +30,45 @@ class App extends React.Component {
         },
       })
       .then((resposta) => {
-        this.setState({ personagens: resposta.data.results });
+        this.setState({
+          personagens: resposta.data.results,
+          filtroPersonagens: resposta.data.results, // Inicializa também com todos os personagens
+        });
       })
       .catch((erro) => {
         console.log(erro.response.data);
       });
   }
-  
+
+  filtrarPersonagens = (filtro) => {
+    const personagensFiltrados = this.state.personagens.filter((personagem) =>
+      personagem.name.toLowerCase().includes(filtro.toLowerCase())
+    );
+    this.setState({ filtroPersonagens: personagensFiltrados });
+  };
 
   render() {
-    const { personagens, personagemSelecionado } = this.state;
+    const { filtroPersonagens, personagemSelecionado } = this.state;
 
     return (
       <div>
-        {this.state.personagemSelecionado?<DetalhesPersonagens 
-        personagem={personagemSelecionado}
-        onVoltar={this.voltarParaLista}
-        />:
-        <Header 
-          personagens={personagens} 
-          onSelectPersonagem={this.selecionarPersonagem} /> }   
+        {personagemSelecionado ? (
+          <DetalhesPersonagens
+            personagem={personagemSelecionado}
+            onVoltar={this.voltarParaLista}
+          />
+        ) : (
+          <Header
+            personagens={filtroPersonagens} // Aqui usamos a lista filtrada
+            onSelectPersonagem={this.selecionarPersonagem}
+            onFiltrarPersonagens={this.filtrarPersonagens}
+            logo="https://www.freepnglogos.com/uploads/rick-and-morty-png/list-rick-and-morty-episodes-wikipedia-24.png"
+            descricao="Logo Rick and Morty"
+          />
+        )}
       </div>
     );
   }
 }
 
 export default App;
-
