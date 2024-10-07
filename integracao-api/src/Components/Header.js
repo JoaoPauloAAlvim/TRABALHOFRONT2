@@ -46,14 +46,6 @@ class Header extends React.Component {
     return (
       <div>
         <img src={logo} alt={descricao} />
-        
-        <input
-          type="text"
-          placeholder="Pesquise o personagem"
-          value={filtroNome}
-          onChange={this.handleChangeNome}
-          aria-label="Filtro de personagens"
-        />
 
         <select value={filtroStatus} onChange={this.handleChangeStatus}>
           <option value="">Status</option>
@@ -76,6 +68,14 @@ class Header extends React.Component {
           <option value="genderless">Genderless</option>
           <option value="unknown">Unknown</option>
         </select>
+
+        <input
+          type="text"
+          placeholder="Pesquise o personagem"
+          value={filtroNome}
+          onChange={this.handleChangeNome}
+          aria-label="Filtro de personagens"
+        />
 
         <div>
           {personagens.length > 0 ? (
