@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import Header from "./Components/Header";
+import './App.css';
 import DetalhesPersonagens from "./Components/DetalhesPersonagens";
 
 class App extends React.Component {
