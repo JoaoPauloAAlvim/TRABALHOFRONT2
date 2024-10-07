@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
 import Header from "./Components/Header";
-import './App.css';
 import DetalhesPersonagens from "./Components/DetalhesPersonagens";
+// CSS inteiro feito pelo Henrique na máquina do João Paulo, por isso tá sem comit
 
 class App extends React.Component {
   state = {
